@@ -119,7 +119,7 @@
       (loop)
       ))
   (dynamic-wind (λ () (void))
-                (loop)
-                (tcp-close listener))
+                (λ () (loop))
+                (λ () (tcp-close listener)))
   )
 
