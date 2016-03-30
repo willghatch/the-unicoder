@@ -6,6 +6,8 @@
 (require racket/string)
 (require racket/list)
 (require racket/runtime-path)
+(require racket/tcp)
+(require racket/unix-socket)
 (require "parse-nameslist.rkt")
 
 ;; well this is awkward
@@ -103,26 +105,78 @@
   (send dialog show #t)
   )
 
+
+(define (serve port-or-path)
+  (let* ([listener (if (number? port-or-path)
+                       (tcp-listen port-or-path 4 #f "127.0.0.1")
+                       (unix-socket-listen port-or-path))]
+         [tcp? (tcp-listener? listener)]
+         [accept (if tcp?
+                     tcp-accept
+                     unix-socket-accept)]
+         [close (if tcp?
+                    tcp-close
+                    (λ (listener)
+                      (unix-socket-close-listener listener)
+                      (when (path-string? port-or-path)
+                        (delete-file port-or-path))))])
+    (define (loop)
+      (let-values ([(in-port out-port) (accept listener)])
+        ;; I should probably check for commands...
+        (define command (read in-port))
+        (close-input-port in-port)
+        (close-output-port out-port)
+        (case command
+          [(prompt) (prompt-for-unicode)]
+          [else (void)])
+        (loop)
+        ))
+    (with-handlers ([exn:break? (λ (e) (close listener))])
+      (loop))))
+
+(define (send-command path-or-port command)
+  (let* ([tcp? (number? path-or-port)]
+         [connect (if tcp?
+                      (λ (port) (tcp-connect "localhost" port))
+                      unix-socket-connect)])
+    (define-values (in-port out-port) (connect path-or-port))
+    (write 'prompt out-port)
+    (flush-output out-port)
+    (close-input-port in-port)
+    (close-output-port out-port)))
+
 (module+ main
-  (require racket/tcp)
+  (require racket/cmdline)
 
-  (define port-num 54321)
+  (define path-or-port (make-parameter #f))
+  (define daemon (make-parameter #f))
+  (define client (make-parameter #f))
 
-  (define default-max-allow-wait 4)
-  (define listener (tcp-listen port-num default-max-allow-wait #f "127.0.0.1"))
-  (define (loop)
-    (let-values ([(in-port out-port) (tcp-accept listener)])
-      ;; I should probably check for commands...
-      (define command (read in-port))
-      (close-input-port in-port)
-      (close-output-port out-port)
-      (case command
-        [(prompt) (prompt-for-unicode)]
-        [else (void)])
-      (loop)
-      ))
-  (dynamic-wind (λ () (void))
-                (λ () (loop))
-                (λ () (tcp-close listener)))
+  (define command
+    (command-line
+     #:program "the-unicoder"
+     #:once-any
+     [("--path") path "path to unix socket"
+      (path-or-port path)]
+     [("--port") port "TCP port number (discouraged)"
+      (path-or-port (string->number port))]
+
+     #:once-each
+     [("--server") "run server"
+      (daemon #t)]
+     [("--client") "connect to server"
+      (client #t)]
+     #:args ([cmd 'prompt])
+     cmd
+     ))
+
+  (when (and (not (path-or-port)) (or (daemon) (client)))
+    (eprintf "Error: specify a path or port for clients and servers~n")
+    (exit 1))
+
+  (cond [(daemon) (serve (path-or-port))]
+        [(client) (send-command (path-or-port) command)]
+        [else (prompt-for-unicode)])
+
   )
 
