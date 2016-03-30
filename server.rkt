@@ -61,7 +61,7 @@
 (define (prompt-for-unicode)
   ;; Make a window, get a unicode selection, close the window, then send the text
 
-  (define dialog (instantiate dialog% ("unicoder")))
+  (define dialog (instantiate dialog% ("the-unicoder")))
 
   ; Add a text field to the dialog
   (define tf
