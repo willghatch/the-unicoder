@@ -113,9 +113,12 @@
   (define (loop)
     (let-values ([(in-port out-port) (tcp-accept listener)])
       ;; I should probably check for commands...
+      (define command (read in-port))
       (close-input-port in-port)
       (close-output-port out-port)
-      (prompt-for-unicode)
+      (case command
+        [(prompt) (prompt-for-unicode)]
+        [else (void)])
       (loop)
       ))
   (dynamic-wind (λ () (void))
