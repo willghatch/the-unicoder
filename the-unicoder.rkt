@@ -27,10 +27,11 @@
    ))
 (define-runtime-path nameslist-file "NamesList.txt")
 (define unicode-name-list-map (nameslist->hash nameslist-file))
-(define unicode-desc-map (foldl (λ (key-pair h)
-                                  (hash-set h (car key-pair) (cdr key-pair)))
-                                latex-y-table
-                                (hash->list unicode-name-list-map)))
+(define unicode-desc-map (hash-set (foldl (λ (key-pair h)
+                                             (hash-set h (car key-pair) (cdr key-pair)))
+                                           latex-y-table
+                                           (hash->list unicode-name-list-map))
+                                   "" ""))
 (define unicode-desc-keys (hash-keys unicode-desc-map))
 ;; TODO - I need to allow custom name->character pairs
 ;; TODO - sort by: most frecent, custom, latex-style, largest % of matches (IE match the smaller description -- sometimes a long description will include all the words of a smaller one), character order
@@ -53,7 +54,8 @@
     (take options+sort (min num-options len))))
 
 (define (get-closest-unicode-char-str desc)
-  (hash-ref unicode-desc-map (car (get-closest-unicode-descs desc))))
+  (with-handlers ([(λ _ #t) (λ _ "")])
+    (hash-ref unicode-desc-map (car (get-closest-unicode-descs desc)))))
 
 (define (send-text t)
   ;; It might be nice to load up libxdo and do this in the same process
@@ -75,16 +77,16 @@
               (send (send self get-editor) get-text))
             (if (equal? (send event get-event-type) 'text-field-enter)
                 ;; do enter...
-                (send-unicode (car (get-closest-unicode-descs (get-text))))
+                (send-text/close (get-closest-unicode-char-str (get-text)))
                 (set-options (get-closest-unicode-descs (get-text)))))]))
 
-  (define (send-unicode desc)
+  (define (send-text/close text)
     (send dialog show #f)
     ;; sleep so that the window is gone before the text is sent
     ;; This is long enough that it should always work, but short enough
     ;; that it shouldn't be much of a bother to humans.
     (sleep 0.07)
-    (send-text (desc->charstr desc))
+    (send-text text)
     )
 
   (define options-list
@@ -131,7 +133,9 @@
           [else (void)])
         (loop)
         ))
-    (with-handlers ([exn:break? (λ (e) (close listener))])
+    (with-handlers ([(λ _ #t) (λ (e)
+                                (close listener)
+                                ((error-display-handler) "Error:" e))])
       (loop))))
 
 (define (send-command path-or-port command)
@@ -151,6 +155,9 @@
   (define path-or-port (make-parameter #f))
   (define daemon (make-parameter #f))
   (define client (make-parameter #f))
+
+;  (send-command (vector-ref (current-command-line-arguments) 0) 'prompt)
+;  (exit 0)
 
   (define command
     (command-line
