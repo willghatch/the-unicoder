@@ -104,6 +104,22 @@
   )
 
 (module+ main
-  (prompt-for-unicode)
+  (require racket/tcp)
+
+  (define port-num 54321)
+
+  (define default-max-allow-wait 4)
+  (define listener (tcp-listen port-num default-max-allow-wait #f "127.0.0.1"))
+  (define (loop)
+    (let-values ([(in-port out-port) (tcp-accept listener)])
+      ;; I should probably check for commands...
+      (close-input-port in-port)
+      (close-output-port out-port)
+      (prompt-for-unicode)
+      (loop)
+      ))
+  (dynamic-wind (λ () (void))
+                (loop)
+                (tcp-close listener))
   )
 
