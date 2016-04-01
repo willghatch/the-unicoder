@@ -1,6 +1,7 @@
 #lang racket/base
 
 (provide unicode-prompter%)
+(provide prompt-once)
 
 (require racket/system)
 (require racket/gui/base)
@@ -108,4 +109,7 @@
       (send dialog show #t))
     (super-new)
     ))
+
+(define (prompt-once)
+  (send (new unicode-prompter%) prompt))
 
