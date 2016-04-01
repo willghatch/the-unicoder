@@ -13,10 +13,21 @@ At the moment it only works on Unix systems running X11, and it requires
 the program @code{xdotool} to be installed.
 
 To use @racket[the-unicoder], simply run @code{the-unicoder} or
-@code{racket -l the-unicoder} in a terminal or from a keyboard shortcut.
+@code{racket -l the-unicoder} in a terminal or from a keyboard
+shortcut.  When the window pops up, simply type in the description for
+the unicode character you want.  @code{the-unicoder} will display the
+top ten results for your query so far, and when you hit enter the
+dialog will go away, and the top result will be sent to the focused
+window (whatever was focused before starting @code{the-unicoder}).
+The top match will be the shortest description that matches each word
+in your query string.  Included descriptions are the official
+descriptions from the unicode standard, short latex-style names, and
+custom descriptions/names you configure yourself.
+
 You may notice that its startup time is too long to make it terribly
 useful for common use.  To improve this, you can run a the-unicoder
 server and send it commands with a the-unicoder client.
+
 
 Summary of options below:
 
