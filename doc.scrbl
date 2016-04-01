@@ -10,7 +10,8 @@
 This is a tool for inputting Unicode characters.
 
 At the moment it only works on Unix systems running X11, and it requires
-the program @code{xdotool} to be installed.
+the program @code{xdotool} to be installed.  If you know how to do what
+xdotool does on OSX or Windows, let me know.
 
 To use @racket[the-unicoder], simply run @code{the-unicoder} or
 @code{racket -l the-unicoder} in a terminal or from a keyboard
