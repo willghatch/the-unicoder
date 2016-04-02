@@ -9,18 +9,15 @@
 (require racket/string)
 (require racket/list)
 (require racket/runtime-path)
+(require mrlib/tex-table)
 
 (require "parse-nameslist.rkt")
 (require "user-tables.rkt")
 
-;; well this is awkward
-(require "stolen-entity-names.rkt")
 
 (define latex-y-table
-  (for/hash ([key (hash-keys drracket-entity-table)])
-    (values (symbol->string key)
-            (string (integer->char (hash-ref drracket-entity-table key))))))
-
+  (for/hash ([kv tex-shortcut-table])
+    (values (first kv) (second kv))))
 
 (define-runtime-path nameslist-file "NamesList.txt")
 

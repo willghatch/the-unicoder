@@ -3,6 +3,7 @@
 (define deps '("base"
                "gui-lib"
                "unix-socket-lib"
+               "tex-table"
                "xdg"))
 (define build-deps '("scribble-lib"
                      "racket-doc"))
