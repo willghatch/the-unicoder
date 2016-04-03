@@ -2,7 +2,7 @@
 
 (define deps '("base"
                "gui-lib"
-               "unix-socket-lib"
+               ("unix-socket-lib" #:version "1.1")
                "tex-table"
                "xdg"))
 (define build-deps '("scribble-lib"
