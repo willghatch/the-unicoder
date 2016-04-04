@@ -4,7 +4,7 @@
                "gui-lib"
                ("unix-socket-lib" #:version "1.1")
                "tex-table"
-               "xdg"))
+               "basedir"))
 (define build-deps '("scribble-lib"
                      "racket-doc"))
 (define scribblings '(("the-unicoder.scrbl" () (tool))))
