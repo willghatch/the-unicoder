@@ -13,6 +13,7 @@
 
 (require "parse-nameslist.rkt")
 (require "user-tables.rkt")
+(require "misc-tables.rkt")
 
 
 (define latex-y-table
@@ -34,6 +35,8 @@
 (define (get-unicode-desc-map)
   (hash-append (get-unicode-name-list-map)
                latex-y-table
+               flag-table
+               sundry-table
                (hash "" "")
                (apply hash-append (cons (hash) (get-user-config-tables)))))
 
@@ -58,7 +61,9 @@
       (let* ([options+ (get-possible-unicode-descs desc)]
              [len (length options+)]
              [options+sort (sort options+ < #:cache-keys? #t
-                                 #:key (λ (d) (string-length d)))])
+                                 #:key (λ (d) (if (string-contains? d desc)
+                                                  (- (string-length d))
+                                                  (string-length d))))])
         (take options+sort (min num-options len))))
     (define (get-closest-unicode-char-str desc)
       (with-handlers ([(λ _ #t) (λ _ "")])
