@@ -62,7 +62,10 @@
              [len (length options+)]
              [options+sort (sort options+ < #:cache-keys? #t
                                  #:key (λ (d) (if (string-contains? d desc)
-                                                  (- (string-length d))
+                                                  ;; I still want to prioritize shorter
+                                                  ;; strings, among those that include
+                                                  ;; the whole literal input.
+                                                  (- (/ 1 (+ 1 (string-length d))))
                                                   (string-length d))))])
         (take options+sort (min num-options len))))
     (define (get-closest-unicode-char-str desc)
