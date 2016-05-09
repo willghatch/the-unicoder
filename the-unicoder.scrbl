@@ -1,4 +1,5 @@
 #lang scribble/manual
+@(require racket/runtime-path)
 @(require (for-label racket/base
                      ))
 
@@ -24,6 +25,15 @@ The top match will be the shortest description that matches each word
 in your query string.  Included descriptions are the official
 descriptions from the unicode standard, short latex-style names, and
 custom descriptions/names you configure yourself.
+
+Here are some screenshots:
+
+@(define-runtime-path screenshot-psi-1 "screenshot-psi-1.png")
+@(define-runtime-path screenshot-psi-2 "screenshot-psi-2.png")
+@(define-runtime-path screenshot-cou-1 "screenshot-cou-1.png")
+@image[screenshot-psi-1]
+@image[screenshot-psi-2]
+@image[screenshot-cou-1]
 
 You may notice that its startup time is too long to make it terribly
 useful for common use.  To improve this, you can run a the-unicoder
