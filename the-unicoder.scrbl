@@ -71,3 +71,12 @@ directory in @code{$XDG_CONFIG_DIRS}.  Multiple can be specified.
 )
 }
 
+@section{Code and License}
+
+The code is available
+@hyperlink["https://github.com/willghatch/the-unicoder"]{on github}.
+
+Except where noted, all files in the project are licensed under the
+terms of the LGPL version 3, or (at your option) any later version
+published by the Free Software Foundation (IE LGPL3+).
+
