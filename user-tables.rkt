@@ -6,7 +6,6 @@
 (define (get-user-config-tables)
   ;; This is a little awkwark.  There's probably a better way to read a file
   ;; and make sure it's closed properly.
-  (current-basedir-program-name "the-unicoder")
   (filter
    hash?
    (for/list ([file (list-config-files "unicoder-table")])

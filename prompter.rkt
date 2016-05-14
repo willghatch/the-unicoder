@@ -8,19 +8,21 @@
 (require racket/class)
 (require racket/string)
 (require racket/list)
-(require racket/runtime-path)
+(require racket/port)
+(require racket/file)
 (require mrlib/tex-table)
+(require net/url)
 
-(require "parse-nameslist.rkt")
+(require "parse-unicode-data.rkt")
 (require "user-tables.rkt")
 (require "misc-tables.rkt")
 
+(require basedir)
+(current-basedir-program-name "the-unicoder")
 
 (define latex-y-table
   (for/hash ([kv tex-shortcut-table])
     (values (first kv) (second kv))))
-
-(define-runtime-path nameslist-file "NamesList.txt")
 
 (define (hash-append ht . hts)
   (define (append-1 l r)
@@ -31,18 +33,73 @@
       ht
       (apply hash-append (cons (append-1 ht (first hts)) (rest hts)))))
 
-(define (get-unicode-name-list-map) (nameslist->hash nameslist-file))
+(define (unicode-data-path)
+  (writable-data-file "UnicodeData.txt"))
+
+(define (download-and-use-unicode-data)
+  (eprintf "UnicodeData.txt not found, attempting download...~n")
+  (let ([unicodedata-str (port->string
+                          (get-pure-port
+                           (string->url unicode-data-url)))])
+    (if (good-download? unicodedata-str)
+        (begin
+          (make-directory* (writable-data-dir))
+          (display-to-file unicodedata-str (unicode-data-path))
+          (get-unicode-data))
+        (error 'get-unicode-data-hash "Couldn't download UnicodeData.txt"))))
+
+(define (good-download? data-string)
+  ;; TODO - how should I check that this is good?
+  ;; For now I'll just assume that if it's big it's the right file...
+  (> (string-length data-string) 100000))
+
+(define (get-unicode-data)
+  (let ([filepath (unicode-data-path)])
+    (if (file-exists? filepath)
+        (unicodedata.txt->data-structs filepath)
+        (download-and-use-unicode-data))))
+
+(define (left-pad desired-length pad-char str)
+  ;; Did somebody say "killer micro-library"?
+  (let* ([len (string-length str)]
+         [padding (make-string (max 0 (- desired-length len)) pad-char)])
+    (string-append padding str)))
+
 (define (get-unicode-desc-map)
-  (hash-append (get-unicode-name-list-map)
-               latex-y-table
-               flag-table
-               sundry-table
-               (hash "" "")
-               (apply hash-append (cons (hash) (get-user-config-tables)))))
+  (let* ([data (get-unicode-data)]
+         [name-table (for/hash ([ud data])
+                       (values (unicode-data-name ud) ud))]
+         [old-name-table
+          (for/hash ([ud (filter
+                          (λ (d) (< 0 (string-length
+                                       (unicode-data-unicode-1-name d))))
+                          data)])
+            (values (unicode-data-unicode-1-name ud) ud))]
+         [hex-table (for/hash ([ud data])
+                      (values (left-pad 4 #\0
+                                        (number->string
+                                         (char->integer (unicode-data-char ud))
+                                         16))
+                              ud))])
+    (hash-append hex-table
+                 old-name-table
+                 name-table
+                 latex-y-table
+                 flag-table
+                 sundry-table
+                 (hash "" "")
+                 (apply hash-append (cons (hash) (get-user-config-tables))))))
 
 (define (send-text t)
   ;; It might be nice to load up libxdo and do this in the same process
   (system* (find-executable-path "xdotool") "type" t))
+
+(define (stringify str-ish)
+  (cond
+    [(string? str-ish) str-ish]
+    [(char? str-ish) (string str-ish)]
+    [(unicode-data? str-ish) (string (unicode-data-char str-ish))]))
+
 
 (define unicode-prompter%
   (class object%
@@ -51,7 +108,7 @@
     (init-field [num-options 10])
 
     (define (desc->charstr desc)
-      (hash-ref desc-map desc))
+      (stringify (hash-ref desc-map desc)))
     (define (get-possible-unicode-descs desc)
       (define parts (string-split desc))
       (filter (λ (key) (for/and ([part parts])
@@ -70,8 +127,7 @@
         (take options+sort (min num-options len))))
     (define (get-closest-unicode-char-str desc)
       (with-handlers ([(λ _ #t) (λ _ "")])
-        (hash-ref desc-map (car (get-closest-unicode-descs desc)))))
-
+        (stringify (hash-ref desc-map (car (get-closest-unicode-descs desc))))))
 
     (public prompt)
     (define (prompt)
