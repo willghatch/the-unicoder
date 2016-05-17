@@ -7,7 +7,6 @@
  )
 
 (require
- racket/match
  racket/string
  racket/file
  )
@@ -18,12 +17,7 @@
 (define unicode-data-url "http://www.unicode.org/Public/UNIDATA/UnicodeData.txt")
 
 (struct unicode-data
-  (char name general-category canonical-combining-classes
-        bidirectional-category character-decomposition-mapping
-        decimal-digit-value digit-value numeric-value
-        mirrored unicode-1-name iso-comment-field
-        uppercase-mapping lowercase-mapping titlecase-mapping
-        )
+  (char name unicode-1-name)
   #:transparent)
 
 (define (hex->char hs)
@@ -33,22 +27,9 @@
     (hex->char hs)))
 
 (define (data-line-list->unicode-data-struct dls)
-  (match-let* ([(list-rest char name cat comb-class bidirect-cat
-                           char-decomp-map decimal-digit-val digit-val
-                           numeric-val mirrored old-name comment
-                           uppercase lowercase titlecase-maybe)
-                dls]
-               [titlecase (if (null? titlecase-maybe)
-                              #f
-                              (hex->char (car titlecase-maybe)))]
-               [(list char uppercase lowercase)
-                (list (hex->char/maybe char)
-                      (hex->char/maybe uppercase)
-                      (hex->char/maybe lowercase))])
-    (unicode-data char (string-downcase name) cat comb-class bidirect-cat
-                  char-decomp-map decimal-digit-val digit-val
-                  numeric-val mirrored (string-downcase old-name) comment
-                  uppercase lowercase titlecase)))
+  (unicode-data (hex->char/maybe (list-ref dls 0))
+                  (string-downcase (list-ref dls 1))
+                  (string-downcase (list-ref dls 10))))
 
 (define (split-data-line line)
   (string-split line ";"))

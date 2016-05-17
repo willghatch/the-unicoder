@@ -174,3 +174,5 @@
 (define (prompt-once)
   (send (new unicode-prompter%) prompt))
 
+(module+ main
+  (prompt-once))
