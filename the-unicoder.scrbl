@@ -8,6 +8,8 @@
 
 @defmodule[the-unicoder]
 
+@section{Usage}
+
 This is a tool for inputting Unicode characters.
 
 At the moment it only works on Unix systems running X11, and it requires
