@@ -3,6 +3,7 @@
 (module+ main
   (require racket/cmdline)
   (require racket/runtime-path)
+  (require basedir)
 
   (define-runtime-path prompter.rkt "prompter.rkt")
   (define-runtime-path server.rkt "server.rkt")
@@ -21,18 +22,19 @@
      [("--port") port "TCP port number (discouraged)"
       (path-or-port (string->number port))]
 
-     #:once-each
+     #:once-any
      [("--server") "run server"
       (daemon #t)]
      [("--client") "connect to server"
       (client #t)]
+     #:once-each
      [("--command") cmd "command to send to the server"
       (command (string->symbol cmd))]
      )
 
   (when (and (not (path-or-port)) (or (daemon) (client)))
-    (eprintf "Error: specify a path or port for clients and servers~n")
-    (exit 1))
+    (path-or-port (writable-runtime-file "the-unicoder-socket"
+                                         #:program "the-unicoder")))
 
   (cond [(daemon) (let ([serve (dynamic-require server.rkt 'serve)])
                     (serve (path-or-port)))]

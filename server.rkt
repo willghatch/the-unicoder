@@ -4,13 +4,16 @@
 
 (require racket/class)
 (require racket/tcp)
+(require racket/file)
 (require racket/unix-socket)
 (require "prompter.rkt")
 
 (define (serve port-or-path)
   (let* ([listener (if (number? port-or-path)
                        (tcp-listen port-or-path 4 #f "127.0.0.1")
-                       (unix-socket-listen port-or-path))]
+                       (begin
+                         (make-parent-directory* port-or-path)
+                         (unix-socket-listen port-or-path)))]
          [tcp? (tcp-listener? listener)]
          [accept (if tcp?
                      tcp-accept

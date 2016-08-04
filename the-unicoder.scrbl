@@ -45,10 +45,10 @@ server and send it commands with a the-unicoder client.
 Summary of options below:
 
 @itemlist[
-  @item{@code{--server}: Run a server that accepts commands.  Requires @code{--path} or @code{--port}.}
-  @item{@code{--client}: Send a command to the server.  Requires @code{--path} or @code{--port}.}
-  @item{@code{--path <path to socket>}: use a Unix domain socket at that path.  Currently only available on Linux and Mac OSX.}
-  @item{@code{--port <port number>}: use the given TCP port.  While it only accepts connections from localhost, it will still let anyone else with access to your machine make you type anything they want.  So, be ye warned.}
+  @item{@code{--server}: Run a server that accepts commands.}
+  @item{@code{--client}: Send a command to the server.}
+  @item{@code{--path <path to socket>}: use a Unix domain socket at that path.  Currently only available on Unix-y systems like GNU/Linux, BSDs, and MacOSX.  But since the-unicoder currently only WORKS on X11 systems which are generally only used on GNU/Linux and BSDs, that doesn't seem like a huge issue.  Unless this or the @code{--port} option is used, the default socket for client/server interaction is a Unix port at @code{$XDG_RUNTIME_DIR/the-unicoder/the-unicoder-socket}}
+  @item{@code{--port <port number>}: use the given TCP port.  While it only accepts connections from localhost, it will still let anyone else with access to your machine send commands.  So, be ye warned.}
   @item{@code{--command <command name>}: Which command to use with the client.  Options are @code{prompt} (the default), and @code{reload} (reloads configuration files).}
   @item{@code{--help}: Show a list of options.}
 ]
