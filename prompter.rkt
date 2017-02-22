@@ -91,8 +91,13 @@
                  (apply hash-append (cons (hash) (get-user-config-tables))))))
 
 (define (send-text t)
-  ;; It might be nice to load up libxdo and do this in the same process
-  (system* (find-executable-path "xdotool") "type" t))
+  (cond
+    [(equal? (system-type 'os) 'macosx)
+     (system* (find-executable-path "cliclick") (string-append "t:" t))]
+    ;; default to Unix with X11.
+    [else
+     ;; It might be nice to load up libxdo and do this in the same process
+     (system* (find-executable-path "xdotool") "type" t)]))
 
 (define (stringify str-ish)
   (cond
