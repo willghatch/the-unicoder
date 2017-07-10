@@ -4,6 +4,7 @@
   (require racket/cmdline)
   (require racket/runtime-path)
   (require basedir)
+  (require "config.rkt")
 
   (define-runtime-path prompter.rkt "prompter.rkt")
   (define-runtime-path server.rkt "server.rkt")
@@ -30,6 +31,8 @@
      #:once-each
      [("--command") cmd "command to send to the server"
       (command (string->symbol cmd))]
+     [("--delay") wait "delay between selecting a character and sending it (in milliseconds)"
+                  (send-delay (/ (string->number wait) 1000))]
      )
 
   (when (and (not (path-or-port)) (or (daemon) (client)))

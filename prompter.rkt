@@ -16,6 +16,7 @@
 (require "parse-unicode-data.rkt")
 (require "user-tables.rkt")
 (require "misc-tables.rkt")
+(require "config.rkt")
 
 (require basedir)
 (current-basedir-program-name "the-unicoder")
@@ -151,7 +152,7 @@
         ;; sleep so that the window is gone before the text is sent
         ;; This is long enough that it should always work, but short enough
         ;; that it shouldn't be much of a bother to humans.
-        (sleep 0.07)
+        (sleep (send-delay))
         (send-text text))
 
       (define options-list
