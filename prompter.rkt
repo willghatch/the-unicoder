@@ -93,7 +93,7 @@
 
 (define (send-text t)
   ;; It might be nice to load up libxdo and do this in the same process
-  (system* (find-executable-path "xdotool") "type" t))
+  (system* (or (find-executable-path "xdotool") (error 'the-unicoder "can't find executable `xdotool`.")) "type" t))
 
 (define (stringify str-ish)
   (cond
