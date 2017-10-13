@@ -33,7 +33,7 @@
         (case command
           [(prompt) (send prompter prompt)]
           [(reload) (loop (new unicode-prompter%))]
-          [else (eprintf "Unrecognized command: ~a~n" command)])
+          [else (eprintf "Unrecognized command: ~a\n" command)])
         (loop prompter)
         ))
     (with-handlers ([(λ _ #t) (λ (e)

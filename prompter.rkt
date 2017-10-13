@@ -38,7 +38,7 @@
   (writable-data-file "UnicodeData.txt"))
 
 (define (download-and-use-unicode-data)
-  (eprintf "UnicodeData.txt not found, attempting download...~n")
+  (eprintf "UnicodeData.txt not found, attempting download...\n")
   (let ([unicodedata-str (port->string
                           (get-pure-port
                            (string->url unicode-data-url)))])
