@@ -10,4 +10,5 @@
 (define scribblings '(("the-unicoder.scrbl" () (tool))))
 (define racket-launcher-names '("the-unicoder"))
 (define racket-launcher-libraries '("main.rkt"))
+(define license '(Apache-2.0 OR MIT))
 
