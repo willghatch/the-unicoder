@@ -92,8 +92,20 @@
                  (apply hash-append (cons (hash) (get-user-config-tables))))))
 
 (define (send-text t)
-  ;; It might be nice to load up libxdo and do this in the same process
-  (system* (or (find-executable-path "xdotool") (error 'the-unicoder "can't find executable `xdotool`.")) "type" t))
+  (define os (system-type 'os))
+  (cond [(eq? os 'windows) (error 'the-unicoder "not currently supported on Windows")]
+        [(eq? os 'macosx)
+         ;; TODO - this is not quite working, it is sending the character to the the-unicoder window, something would need to be done about selecting the right window to receive the text.  I'll try again later some time.
+         (system* (or (find-executable-path "hs")
+                      (error 'the-unicoder "can't find executable `hs` for hammerspoon."))
+                  "-c"
+                  ;; This should be shell escaped, but I'm lazy and not going to bother right now.
+                  (format "hs.eventtap.keyStrokes(\"~a\")" t))]
+        [(eq? os 'unix)
+         ;; It might be nice to load up libxdo and do this in the same process
+         (system* (or (find-executable-path "xdotool") (error 'the-unicoder "can't find executable `xdotool`.")) "type" t)]
+        [else (error 'the-unicoder "operating system not detected/supported.")])
+  )
 
 (define (stringify str-ish)
   (cond
