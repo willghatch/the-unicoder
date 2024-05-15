@@ -102,8 +102,19 @@
                   ;; This should be shell escaped, but I'm lazy and not going to bother right now.
                   (format "hs.eventtap.keyStrokes(\"~a\")" t))]
         [(eq? os 'unix)
-         ;; It might be nice to load up libxdo and do this in the same process
-         (system* (or (find-executable-path "xdotool") (error 'the-unicoder "can't find executable `xdotool`.")) "type" t)]
+         (cond [(equal? (getenv "XDG_SESSION_TYPE") "wayland")
+                (system* (or (find-executable-path "wtype")
+                             (error 'the-unicoder
+                                    "can't find executable `wtype`."))
+                         "--" t)]
+               [(getenv "DISPLAY")
+                ;; It might be nice to load up libxdo and do this in the same process
+                (system* (or (find-executable-path "xdotool")
+                             (error 'the-unicoder
+                                    "can't find executable `xdotool`."))
+                         "type" t)]
+               [else (error 'the-unicoder "window system not detected")])
+         ]
         [else (error 'the-unicoder "operating system not detected/supported.")])
   )
 
