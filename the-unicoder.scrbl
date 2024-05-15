@@ -12,9 +12,10 @@
 
 This is a tool for inputting Unicode characters.
 
-At the moment it only works on Unix systems running X11, and it requires
-the program @code{xdotool} to be installed.  If you know how to do what
-xdotool does on OSX or Windows, let me know.
+At the moment it only works on Unix systems running X11 (via the program @code{xdotool}) or Wayland (via the program @code{wtype}).
+I added a MacOS path using @code{hammerspoon}, but it doesn't really work because it doesn't focus the previous window.
+(Actually, depending on your window manager in Linux it might not work for the same reason... I only use window managers that will automatically focus the previously focused window.)
+If you know how to do what xdotool does on Windows, or you know the fix for getting focus back to the previous window, please let me know.
 
 To use @racket[the-unicoder], simply run @code{the-unicoder} or
 @code{racket -l the-unicoder} in a terminal or from a keyboard
