@@ -95,7 +95,6 @@
   (define os (system-type 'os))
   (cond [(eq? os 'windows) (error 'the-unicoder "not currently supported on Windows")]
         [(eq? os 'macosx)
-         ;; TODO - this is not quite working, it is sending the character to the the-unicoder window, something would need to be done about selecting the right window to receive the text.  I'll try again later some time.
          (system* (or (find-executable-path "hs")
                       (error 'the-unicoder "can't find executable `hs` for hammerspoon."))
                   "-c"
@@ -117,6 +116,31 @@
          ]
         [else (error 'the-unicoder "operating system not detected/supported.")])
   )
+
+(define (get-focused-window)
+  (define os (system-type 'os))
+  (cond [(eq? os 'macosx)
+         ;; This gets the process, which is good enough for my current purposes.
+         (let* ([process-name
+                 (with-output-to-string
+                   (λ ()
+                     (system* (find-executable-path "osascript")
+                              "-e"
+                              "tell application \"System Events\" to tell (first process whose frontmost is true) to return name")))]
+                [trimmed (string-trim process-name)])
+           (if (equal? "" trimmed)
+               #f
+               trimmed))]
+        ;; TODO - do this on X11 and Wayland, too
+        [else #f]))
+
+(define (reset-focused-window window)
+  (define os (system-type 'os))
+  (cond [(eq? os 'macosx)
+         (system* (find-executable-path "osascript")
+                  "-e"
+                  (format "tell application \"~a\" to activate" window))]
+        [else (error "reset-focused-window not yet supported for this platform")]))
 
 (define (stringify str-ish)
   (cond
@@ -157,6 +181,9 @@
     (define (prompt)
       ;; Make a window, get a unicode selection, close the window, then send the text
 
+      (define current-window
+        (get-focused-window))
+
       (define dialog (instantiate dialog% ("the-unicoder")))
       (define tf
         (new text-field% [parent dialog]
@@ -172,6 +199,8 @@
 
       (define (send-text/close text)
         (send dialog show #f)
+        (when current-window
+          (reset-focused-window current-window))
         ;; sleep so that the window is gone before the text is sent
         ;; This is long enough that it should always work, but short enough
         ;; that it shouldn't be much of a bother to humans.
